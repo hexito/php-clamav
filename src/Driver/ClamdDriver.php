@@ -14,7 +14,13 @@ class ClamdDriver extends AbstractDriver
     public const PORT = 3310;
     public const SOCKET_PATH = '/var/run/clamav/clamd.ctl';
     public const COMMAND = "n%s\n";
-    private SocketInterface $socket;
+    private ?SocketInterface $socket;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->socket = null;
+    }
 
     public function ping(): bool
     {
@@ -95,25 +101,27 @@ class ClamdDriver extends AbstractDriver
 
     protected function getSocket(): SocketInterface
     {
-        if (!$this->socket) {
-            if ($this->getOption('socket')) { // socket set in config
-                $options = [
-                    'socket' => $this->getOption('socket'),
-                ];
-            } elseif ($this->getOption('host')) { // host set in config
-                $options = [
-                    'host' => $this->getOption('host'),
-                    'port' => $this->getOption('port', static::PORT),
-                ];
-            } else { // use defaults
-                $options = [
-                    'socket' => $this->getOption('socket', static::SOCKET_PATH),
-                    'host' => $this->getOption('host', static::HOST),
-                    'port' => $this->getOption('port', static::PORT),
-                ];
-            }
-            $this->socket = SocketFactory::create($options);
+        if (null !== $this->socket) {
+            return $this->socket;
         }
+
+        if ($this->getOption('socket')) { // socket set in config
+            $options = [
+                'socket' => $this->getOption('socket'),
+            ];
+        } elseif ($this->getOption('host')) { // host set in config
+            $options = [
+                'host' => $this->getOption('host'),
+                'port' => $this->getOption('port', static::PORT),
+            ];
+        } else { // use defaults
+            $options = [
+                'socket' => $this->getOption('socket', static::SOCKET_PATH),
+                'host' => $this->getOption('host', static::HOST),
+                'port' => $this->getOption('port', static::PORT),
+            ];
+        }
+        $this->socket = SocketFactory::create($options);
 
         return $this->socket;
     }
