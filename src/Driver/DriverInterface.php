@@ -1,12 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Avasil\ClamAv\Driver;
 
 use Avasil\ClamAv\ScannerInterface;
 
-/**
- * Interface DriverInterface
- * @package Avasil\ClamAv\Driver
- */
 interface DriverInterface extends ScannerInterface
 {
 }

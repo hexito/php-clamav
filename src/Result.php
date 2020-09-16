@@ -1,9 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Avasil\ClamAv;
 
 /**
- * Interface ResultInterface
- * @package Avasil\ClamAv
+ * Interface ResultInterface.
  */
 class Result implements ResultInterface
 {
@@ -19,8 +21,8 @@ class Result implements ResultInterface
 
     /**
      * Result constructor.
+     *
      * @param string $target
-     * @param array $infected
      */
     public function __construct($target, array $infected = [])
     {
@@ -29,7 +31,7 @@ class Result implements ResultInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function isClean()
     {
@@ -37,7 +39,7 @@ class Result implements ResultInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function isInfected()
     {
@@ -45,7 +47,7 @@ class Result implements ResultInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getInfected()
     {
@@ -53,7 +55,7 @@ class Result implements ResultInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getTarget()
     {
@@ -83,9 +85,11 @@ class Result implements ResultInterface
     public function __toString()
     {
         $str = [];
+
         foreach ($this->infected as $k => $v) {
-            $str[] = $k . ': ' . $v;
+            $str[] = $k.': '.$v;
         }
+
         return join(PHP_EOL, $str);
     }
 }

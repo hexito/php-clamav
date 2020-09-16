@@ -1,35 +1,16 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Avasil\ClamAv;
 
-/**
- * Interface ScannerInterface
- * @package Avasil\ClamAv
- */
 interface ScannerInterface
 {
-    /**
-     * scan is used to scan file or directory.
-     * @param $path
-     * @return array
-     */
-    public function scan($path);
+    public function scan(string $path): array;
 
-    /**
-     * scanBuffer is used to scan in-memory data
-     * @param $buffer
-     * @return array
-     */
-    public function scanBuffer($buffer);
+    public function scanBuffer(string $buffer): array;
 
-    /**
-     * ping is used to see whether Clamd is alive or not
-     * @return bool
-     */
-    public function ping();
+    public function ping(): bool;
 
-    /**
-     * version is used to receive the version of Clamd
-     * @return string
-     */
-    public function version();
+    public function version(): string;
 }

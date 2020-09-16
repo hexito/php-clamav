@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Avasil\ClamAv;
 
 use Avasil\ClamAv\Driver\DriverFactory;
@@ -16,20 +19,19 @@ class Scanner implements ScannerInterface
      * @var array
      */
     protected $options = [
-        'driver' => 'default'
+        'driver' => 'default',
     ];
 
     /**
      * Scanner constructor.
-     * @param array $options
      */
-    public function __construct(array $options = array())
+    public function __construct(array $options = [])
     {
         $this->options = array_merge($this->options, $options);
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function ping()
     {
@@ -37,7 +39,7 @@ class Scanner implements ScannerInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function version()
     {
@@ -45,15 +47,14 @@ class Scanner implements ScannerInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
      * @throws RuntimeException
      */
     public function scan($path)
     {
         if (!is_readable($path)) {
-            throw new RuntimeException(
-                sprintf('"%s" does not exist or is not readable.')
-            );
+            throw new RuntimeException(sprintf('"%s" does not exist or is not readable.'));
         }
 
         // make sure clamav works with real paths
@@ -66,15 +67,14 @@ class Scanner implements ScannerInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
      * @throws RuntimeException
      */
     public function scanBuffer($buffer)
     {
         if (!is_scalar($buffer) && (!is_object($buffer) || !method_exists($buffer, '__toString'))) {
-            throw new RuntimeException(
-                sprintf('Expected scalar value, received %s', gettype($buffer))
-            );
+            throw new RuntimeException(sprintf('Expected scalar value, received %s', gettype($buffer)));
         }
 
         return $this->parseResults(
@@ -91,6 +91,7 @@ class Scanner implements ScannerInterface
         if (!$this->driver) {
             $this->driver = DriverFactory::create($this->options);
         }
+
         return $this->driver;
     }
 
@@ -104,7 +105,7 @@ class Scanner implements ScannerInterface
 
     /**
      * @param $path
-     * @param array $infected
+     *
      * @return ResultInterface
      */
     protected function parseResults($path, array $infected)

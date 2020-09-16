@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 error_reporting(E_ALL);
 ini_set('display_errors', true);
 
@@ -28,7 +30,7 @@ $toScan = [
     '../examples/files/infected.txt',
     '../examples/files/',
     'Lorem Ipsum Dolor',
-    'Lorem Ipsum Dolor X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*'
+    'Lorem Ipsum Dolor X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*',
 ];
 
 foreach ($toScan as $f) {
@@ -39,6 +41,7 @@ foreach ($toScan as $f) {
         echo 'Scanning buffer', '<br />';
         $result = $clamd->scanBuffer($f);
     }
+
     if ($result->isClean()) {
         echo ' - ', $result->getTarget(), ' is clean', '<br />';
     } else {

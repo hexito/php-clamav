@@ -1,18 +1,13 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Avasil\ClamAv\Driver;
 
 use Avasil\ClamAv\Exception\ConfigurationException;
 
-/**
- * Class DriverFactory
- * @package Avasil\ClamAv\Driver
- */
 class DriverFactory
 {
-    /**
-     * Available drivers
-     * @var array
-     */
     const DRIVERS = [
         'clamscan' => ClamscanDriver::class,
         'clamd_local' => ClamdDriver::class,
@@ -20,27 +15,18 @@ class DriverFactory
         'default' => ClamscanDriver::class,
     ];
 
-    /**
-     * @inheritdoc
-     * @throws ConfigurationException
-     */
-    public static function create(array $config)
+    public static function create(array $config): AbstractDriver
     {
         if (empty($config['driver'])) {
             throw new ConfigurationException('ClamAV driver required, please check your config.');
         }
 
         if (!array_key_exists($config['driver'], static::DRIVERS)) {
-            throw new ConfigurationException(
-                sprintf(
-                    'Invalid driver "%s" specified. Available options are: %s',
-                    $config['driver'],
-                    join(', ', array_keys(static::DRIVERS))
-                )
-            );
+            throw new ConfigurationException(sprintf('Invalid driver "%s" specified. Available options are: %s', $config['driver'], join(', ', array_keys(static::DRIVERS))));
         }
 
         $driver = static::DRIVERS[$config['driver']];
+
         return new $driver($config);
     }
 }

@@ -1,34 +1,22 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Avasil\ClamAv\Driver;
 
 use Avasil\ClamAv\Exception\RuntimeException;
 
-/**
- * Class ClamdRemoteDriver
- * @package Avasil\ClamAv\Driver
- */
 class ClamdRemoteDriver extends ClamdDriver
 {
-    /**
-     * @var string
-     */
-    const SOCKET_PATH = '';
+    public const SOCKET_PATH = '';
 
-    /**
-     * ClamdRemoteDriver constructor.
-     * @param array $options
-     */
-    public function __construct(array $options = array())
+    public function __construct(array $options = [])
     {
         unset($options['socket']);
         parent::__construct($options);
     }
 
-    /**
-     * @inheritdoc
-     * @throws RuntimeException
-     */
-    public function scan($path)
+    public function scan(string $path): array
     {
         if (!is_file($path)) {
             throw new RuntimeException('Remote scan of directory is not supported');
@@ -36,7 +24,7 @@ class ClamdRemoteDriver extends ClamdDriver
 
         $this->sendCommand('INSTREAM');
 
-        $resource = fopen($path, 'r');
+        $resource = fopen($path, 'rb');
 
         $this->getSocket()->streamResource($resource);
 
@@ -44,8 +32,8 @@ class ClamdRemoteDriver extends ClamdDriver
 
         $result = $this->getResponse();
 
-        if (false != ($filtered = $this->filterScanResult($result))) {
-            $filtered[0] = preg_replace('/^stream:/', $path . ':', $filtered[0]);
+        if (false !== ($filtered = $this->filterScanResult($result))) {
+            $filtered[0] = preg_replace('/^stream:/', $path.':', $filtered[0]);
         }
 
         return $filtered;

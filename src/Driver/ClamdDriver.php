@@ -1,66 +1,36 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Avasil\ClamAv\Driver;
 
 use Avasil\ClamAv\Exception\RuntimeException;
-use Avasil\ClamAv\Socket\Socket;
 use Avasil\ClamAv\Socket\SocketFactory;
 use Avasil\ClamAv\Socket\SocketInterface;
 
-/**
- * Class ClamdDriver
- * @package Avasil\ClamAv\Driver
- */
 class ClamdDriver extends AbstractDriver
 {
-    /**
-     * @var string
-     */
-    const HOST = '127.0.0.1';
+    public const HOST = '127.0.0.1';
+    public const PORT = 3310;
+    public const SOCKET_PATH = '/var/run/clamav/clamd.ctl';
+    public const COMMAND = "n%s\n";
+    private SocketInterface $socket;
 
-    /**
-     * @var int
-     */
-    const PORT = 3310;
-
-    /**
-     * @var string
-     */
-    const SOCKET_PATH = '/var/run/clamav/clamd.ctl';
-
-    /**
-     * @var string
-     */
-    const COMMAND = "n%s\n";
-
-    /**
-     * @var Socket
-     */
-    private $socket;
-
-    /**
-     * ping command is used to see whether Clamd is alive or not
-     * @return bool
-     */
-    public function ping()
+    public function ping(): bool
     {
         $this->sendCommand('PING');
-        return trim($this->getResponse()) === 'PONG';
+
+        return 'PONG' === trim($this->getResponse());
     }
 
-    /**
-     * version is used to receive the version of Clamd
-     * @return string
-     */
-    public function version()
+    public function version(): string
     {
         $this->sendCommand('VERSION');
+
         return trim($this->getResponse());
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function scan($path)
+    public function scan(string $path): array
     {
         if (is_dir($path)) {
             $command = 'CONTSCAN';
@@ -68,17 +38,14 @@ class ClamdDriver extends AbstractDriver
             $command = 'SCAN';
         }
 
-        $this->sendCommand($command . ' ' . $path);
+        $this->sendCommand($command.' '.$path);
 
         $result = $this->getResponse();
 
         return $this->filterScanResult($result);
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function scanBuffer($buffer)
+    public function scanBuffer(string $buffer): array
     {
         $this->sendCommand('INSTREAM');
 
@@ -86,50 +53,44 @@ class ClamdDriver extends AbstractDriver
 
         $result = $this->getResponse();
 
-        if (false != ($filtered = $this->filterScanResult($result))) {
+        if (false !== ($filtered = $this->filterScanResult($result))) {
             $filtered[0] = preg_replace('/^stream:/', 'buffer:', $filtered[0]);
         }
 
         return $filtered;
     }
 
-    /**
-     * @param string $command
-     * @return int|false
-     */
-    protected function sendCommand($command)
+    protected function sendCommand(string $command): ?int
     {
-        return $this->sendRequest(sprintf(static::COMMAND, $command));
+        $response = $this->sendRequest(sprintf(static::COMMAND, $command));
+
+        return false === $response ? null : $response;
     }
 
-    /**
-     * @param SocketInterface $socket
-     */
-    public function setSocket(SocketInterface $socket)
+    public function setSocket(SocketInterface $socket): ClamdDriver
     {
         $this->socket = $socket;
+
+        return $this;
     }
 
-    /**
-     * @return SocketInterface
-     */
-    protected function getSocket()
+    protected function getSocket(): SocketInterface
     {
         if (!$this->socket) {
             if ($this->getOption('socket')) { // socket set in config
                 $options = [
-                    'socket' => $this->getOption('socket')
+                    'socket' => $this->getOption('socket'),
                 ];
             } elseif ($this->getOption('host')) { // host set in config
                 $options = [
                     'host' => $this->getOption('host'),
-                    'port' => $this->getOption('port', static::PORT)
+                    'port' => $this->getOption('port', static::PORT),
                 ];
             } else { // use defaults
                 $options = [
                     'socket' => $this->getOption('socket', static::SOCKET_PATH),
                     'host' => $this->getOption('host', static::HOST),
-                    'port' => $this->getOption('port', static::PORT)
+                    'port' => $this->getOption('port', static::PORT),
                 ];
             }
             $this->socket = SocketFactory::create($options);
@@ -138,47 +99,36 @@ class ClamdDriver extends AbstractDriver
         return $this->socket;
     }
 
-    /**
-     * @param $data
-     * @param int $flags
-     * @return false|int
-     * @throws RuntimeException
-     */
-    protected function sendRequest($data, $flags = 0)
+    protected function sendRequest(string $data, int $flags = 0): ?int
     {
-        if (false == ($bytes = $this->getSocket()->send($data, $flags))) {
+        if (false === ($bytes = $this->getSocket()->send($data, $flags))) {
             throw new RuntimeException('Cannot write to socket');
         }
-        return $bytes;
+
+        return false === $bytes ? null : $bytes;
     }
 
-    /**
-     * @param int $flags
-     * @return string|false
-     */
-    protected function getResponse($flags = MSG_WAITALL)
+    protected function getResponse(int $flags = MSG_WAITALL): ?string
     {
         $data = $this->getSocket()->receive($flags);
         $this->getSocket()->close();
-        return $data;
+
+        return false === $data ? null : $data;
     }
 
-    /**
-     * @param string $result
-     * @param string $filter
-     * @return array
-     */
-    protected function filterScanResult($result, $filter = 'FOUND')
+    protected function filterScanResult(string $result, string $filter = 'FOUND'): array
     {
-        $result = explode("\n", $result);
-        $result = array_filter($result);
+        $explodedResult = explode("\n", $result);
+        $explodedResult = array_filter($explodedResult);
 
         $list = [];
-        foreach ($result as $line) {
+
+        foreach ($explodedResult as $line) {
             if (substr($line, -5) === $filter) {
                 $list[] = $line;
             }
         }
+
         return $list;
     }
 }

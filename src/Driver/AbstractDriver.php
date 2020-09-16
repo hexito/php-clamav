@@ -1,26 +1,18 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Avasil\ClamAv\Driver;
 
 use Avasil\ClamAv\Traits\GetOptionTrait;
 
-/**
- * Class AbstractDriver
- * @package Avasil\ClamAv\Driver
- */
 abstract class AbstractDriver implements DriverInterface
 {
     use GetOptionTrait;
 
-    /**
-     * @var array
-     */
-    protected $options;
+    protected array $options;
 
-    /**
-     * ClamscanDriver constructor.
-     * @param array $options
-     */
-    public function __construct($options = array())
+    public function __construct(array $options = [])
     {
         $this->options = $options;
     }
