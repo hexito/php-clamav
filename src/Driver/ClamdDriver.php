@@ -58,9 +58,12 @@ class ClamdDriver extends AbstractDriver
         $this->getSocket()->streamData($buffer);
 
         $result = $this->getResponse();
+        $filtered = $this->filterScanResult($result);
 
-        if (false !== ($filtered = $this->filterScanResult($result))) {
-            $filtered[0] = preg_replace('/^stream:/', 'buffer:', $filtered[0]);
+        if (!empty($filtered)) {
+            foreach ($filtered as $key => $value) {
+                $filtered[$key] = preg_replace('/^stream:/', 'buffer:', $filtered[$key]);
+            }
         }
 
         return $filtered;
@@ -77,9 +80,12 @@ class ClamdDriver extends AbstractDriver
         fclose($resource);
 
         $result = $this->getResponse();
+        $filtered = $this->filterScanResult($result);
 
-        if (false !== ($filtered = $this->filterScanResult($result))) {
-            $filtered[0] = preg_replace('/^stream:/', $path.':', $filtered[0]);
+        if (!empty($filtered)) {
+            foreach ($filtered as $key => $value) {
+                $filtered[$key] = preg_replace('/^stream:/', $path.':', $filtered[$key]);
+            }
         }
 
         return $filtered;
@@ -143,10 +149,19 @@ class ClamdDriver extends AbstractDriver
         return false === $data ? null : $data;
     }
 
-    protected function filterScanResult(string $result): array
+    protected function filterScanResult(string $result, string $filter = 'FOUND'): array
     {
         $explodedResult = explode("\n", $result);
+        $explodedResult = array_filter($explodedResult);
 
-        return array_filter($explodedResult);
+        $list = [];
+
+        foreach ($explodedResult as $line) {
+            if (substr($line, -5) === $filter) {
+                $list[] = $line;
+            }
+        }
+
+        return $list;
     }
 }
