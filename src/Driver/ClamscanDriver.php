@@ -82,6 +82,13 @@ class ClamscanDriver extends AbstractDriver
         return $parsed;
     }
 
+    public function scanResource(string $path): array
+    {
+        // Todo implement
+
+        return [];
+    }
+
     protected function getExecutable(): string
     {
         return $this->getOption('executable', static::EXECUTABLE);

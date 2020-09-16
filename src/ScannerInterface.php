@@ -10,6 +10,8 @@ interface ScannerInterface
 
     public function scanBuffer(string $buffer): array;
 
+    public function scanResource(string $path): array;
+
     public function ping(): bool;
 
     public function version(): string;

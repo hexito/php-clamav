@@ -60,6 +60,25 @@ class ClamdDriver extends AbstractDriver
         return $filtered;
     }
 
+    public function scanResource(string $path): array
+    {
+        $this->sendCommand('INSTREAM');
+
+        $resource = fopen($path, 'rb+');
+
+        $this->getSocket()->streamResource($resource);
+
+        fclose($resource);
+
+        $result = $this->getResponse();
+
+        if (false !== ($filtered = $this->filterScanResult($result))) {
+            $filtered[0] = preg_replace('/^stream:/', $path.':', $filtered[0]);
+        }
+
+        return $filtered;
+    }
+
     protected function sendCommand(string $command): ?int
     {
         $response = $this->sendRequest(sprintf(static::COMMAND, $command));

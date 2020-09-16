@@ -22,20 +22,6 @@ class ClamdRemoteDriver extends ClamdDriver
             throw new RuntimeException('Remote scan of directory is not supported');
         }
 
-        $this->sendCommand('INSTREAM');
-
-        $resource = fopen($path, 'rb');
-
-        $this->getSocket()->streamResource($resource);
-
-        fclose($resource);
-
-        $result = $this->getResponse();
-
-        if (false !== ($filtered = $this->filterScanResult($result))) {
-            $filtered[0] = preg_replace('/^stream:/', $path.':', $filtered[0]);
-        }
-
-        return $filtered;
+        return $this->scanResource($path);
     }
 }
