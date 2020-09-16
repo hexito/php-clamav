@@ -10,54 +10,33 @@ use Avasil\ClamAv\Exception\RuntimeException;
 
 class Scanner implements ScannerInterface
 {
-    /**
-     * @var DriverInterface
-     */
-    protected $driver;
-
-    /**
-     * @var array
-     */
-    protected $options = [
+    protected ?DriverInterface $driver;
+    protected array $options = [
         'driver' => 'default',
     ];
 
-    /**
-     * Scanner constructor.
-     */
     public function __construct(array $options = [])
     {
+        $this->driver = null;
         $this->options = array_merge($this->options, $options);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function ping()
+    public function ping(): bool
     {
         return $this->getDriver()->ping();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function version()
+    public function version(): string
     {
         return $this->getDriver()->version();
     }
 
-    /**
-     * {@inheritdoc}
-     *
-     * @throws RuntimeException
-     */
-    public function scan($path)
+    public function scan(string $path): ResultInterface
     {
         if (!is_readable($path)) {
-            throw new RuntimeException(sprintf('"%s" does not exist or is not readable.'));
+            throw new RuntimeException(sprintf('"%s" does not exist or is not readable.', $path));
         }
 
-        // make sure clamav works with real paths
         $real_path = realpath($path);
 
         return $this->parseResults(
@@ -66,49 +45,41 @@ class Scanner implements ScannerInterface
         );
     }
 
-    /**
-     * {@inheritdoc}
-     *
-     * @throws RuntimeException
-     */
-    public function scanBuffer($buffer)
+    public function scanBuffer(string $buffer): ResultInterface
     {
-        if (!is_scalar($buffer) && (!is_object($buffer) || !method_exists($buffer, '__toString'))) {
-            throw new RuntimeException(sprintf('Expected scalar value, received %s', gettype($buffer)));
-        }
-
         return $this->parseResults(
             'buffer',
             $this->getDriver()->scanBuffer($buffer)
         );
     }
 
-    /**
-     * @return DriverInterface
-     */
-    public function getDriver()
+    public function scanResource(string $path): ResultInterface
     {
-        if (!$this->driver) {
+        if (!is_readable($path)) {
+            throw new RuntimeException(sprintf('"%s" does not exist or is not readable.', $path));
+        }
+
+        return $this->parseResults(
+            $path,
+            $this->getDriver()->scanResource($path)
+        );
+    }
+
+    public function getDriver(): DriverInterface
+    {
+        if (null === $this->driver) {
             $this->driver = DriverFactory::create($this->options);
         }
 
         return $this->driver;
     }
 
-    /**
-     * @param DriverInterface $driver
-     */
-    public function setDriver($driver)
+    public function setDriver(DriverInterface $driver): void
     {
         $this->driver = $driver;
     }
 
-    /**
-     * @param $path
-     *
-     * @return ResultInterface
-     */
-    protected function parseResults($path, array $infected)
+    protected function parseResults($path, array $infected): ResultInterface
     {
         $result = new Result($path);
 

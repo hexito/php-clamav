@@ -12,13 +12,13 @@ class ClamdDriver extends AbstractDriver
 {
     public const HOST = '127.0.0.1';
     public const PORT = 3310;
-    public const SOCKET_PATH = '/var/run/clamav/clamd.ctl';
+    public const SOCKET_PATH = '/var/run/clamav/clamd.sock';
     public const COMMAND = "n%s\n";
     private ?SocketInterface $socket;
 
-    public function __construct()
+    public function __construct(array $options = [])
     {
-        parent::__construct();
+        parent::__construct($options);
         $this->socket = null;
     }
 
@@ -143,19 +143,10 @@ class ClamdDriver extends AbstractDriver
         return false === $data ? null : $data;
     }
 
-    protected function filterScanResult(string $result, string $filter = 'FOUND'): array
+    protected function filterScanResult(string $result): array
     {
         $explodedResult = explode("\n", $result);
-        $explodedResult = array_filter($explodedResult);
 
-        $list = [];
-
-        foreach ($explodedResult as $line) {
-            if (substr($line, -5) === $filter) {
-                $list[] = $line;
-            }
-        }
-
-        return $list;
+        return array_filter($explodedResult);
     }
 }

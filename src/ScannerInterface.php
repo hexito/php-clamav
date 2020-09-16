@@ -6,11 +6,11 @@ namespace Avasil\ClamAv;
 
 interface ScannerInterface
 {
-    public function scan(string $path): array;
+    public function scan(string $path): ResultInterface;
 
-    public function scanBuffer(string $buffer): array;
+    public function scanBuffer(string $buffer): ResultInterface;
 
-    public function scanResource(string $path): array;
+    public function scanResource(string $path): ResultInterface;
 
     public function ping(): bool;
 

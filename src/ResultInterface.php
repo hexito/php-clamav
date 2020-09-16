@@ -4,36 +4,13 @@ declare(strict_types=1);
 
 namespace Avasil\ClamAv;
 
-/**
- * Interface ResultInterface.
- */
 interface ResultInterface
 {
-    /**
-     * Return true if no virus was found.
-     *
-     * @return bool
-     */
-    public function isClean();
+    public function isClean(): bool;
 
-    /**
-     * Return true if a virus was found.
-     *
-     * @return bool
-     */
-    public function isInfected();
+    public function isInfected(): bool;
 
-    /**
-     * Returns the list of infected files and virus information.
-     *
-     * @return array
-     */
-    public function getInfected();
+    public function getInfected(): array;
 
-    /**
-     * Returns the scanned resource.
-     *
-     * @return string
-     */
-    public function getTarget();
+    public function getTarget(): string;
 }

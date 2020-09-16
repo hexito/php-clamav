@@ -4,85 +4,48 @@ declare(strict_types=1);
 
 namespace Avasil\ClamAv;
 
-/**
- * Interface ResultInterface.
- */
 class Result implements ResultInterface
 {
-    /**
-     * @var string
-     */
-    private $target;
+    private string $target;
+    private array $infected;
 
-    /**
-     * @var array
-     */
-    private $infected;
-
-    /**
-     * Result constructor.
-     *
-     * @param string $target
-     */
-    public function __construct($target, array $infected = [])
+    public function __construct(string $target = '', array $infected = [])
     {
         $this->target = $target;
         $this->infected = $infected;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isClean()
+    public function isClean(): bool
     {
         return !$this->isInfected();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isInfected()
+    public function isInfected(): bool
     {
-        return count($this->infected);
+        return 0 < count($this->infected);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getInfected()
+    public function getInfected(): array
     {
         return $this->infected;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getTarget()
+    public function getTarget(): string
     {
         return $this->target;
     }
 
-    /**
-     * @param string $file
-     * @param string $virus
-     */
-    public function addInfected($file, $virus)
+    public function addInfected(string $file, string $virus): void
     {
         $this->infected[$file] = $virus;
     }
 
-    /**
-     * @param array $infected
-     */
-    public function setInfected($infected)
+    public function setInfected(array $infected = []): void
     {
         $this->infected = $infected;
     }
 
-    /**
-     * @return string
-     */
-    public function __toString()
+    public function __toString(): string
     {
         $str = [];
 
@@ -90,6 +53,6 @@ class Result implements ResultInterface
             $str[] = $k.': '.$v;
         }
 
-        return join(PHP_EOL, $str);
+        return implode(PHP_EOL, $str);
     }
 }
