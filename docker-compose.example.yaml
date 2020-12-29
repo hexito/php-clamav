@@ -1,0 +1,7 @@
+version: '3.8'
+
+services:
+  app:
+    image: php:8.0-cli-alpine
+    volumes:
+      - ./:/usr/src/app/:cached
